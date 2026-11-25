@@ -31,6 +31,20 @@ const errorEl = document.getElementById("error");
  */
 async function fetchMedicines() {
     // TODO: fetch(`${BASE_URL}/medicines`), check response.ok, return the data.
+    try {
+        const response = await fetch('http://localhost:8000/medicines');
+        if (!response.ok) throw new Error('Response was not okay');
+        const result = await response.json();
+
+        const medicines = result.medicines || result.data || []; 
+        result.medicines.forEach(rawMed => {
+            const med = rawMed;
+            medicines.push(med);
+        });
+        console.log(medicines);
+    } catch (error) {
+        console.error("Failed to fetch medicines:", error);
+    }
 }
 
 /**
@@ -43,6 +57,31 @@ function renderMedicines(data) {
     // TODO: build a table (the .results styles expect a <table>), iterate the
     // records, and render each row safely. Use the .invalid class to flag bad
     // values if you like.
+    const table = document.createElement("table")
+    const tbody = document.createElement("tbody")
+
+    const headerRow = document.createElement("tr");
+    ["Name", "Price"].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+    data.forEach(med => {
+        const medicines = [{ name: med.name, price: med.price}]
+        medicines.forEach(item => {
+            const row = document.createElement("tr");
+            Object.values(item).forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+            tbody.appendChild(row);
+        })
+
+        table.appendChild(tbody);
+        document.body.appendChild(Table);
+    });
 }
 
 /**
@@ -59,6 +98,7 @@ async function fetchUnreliable() {
 document.getElementById("load-medicines").addEventListener("click", async () => {
     // TODO: call fetchMedicines() then renderMedicines(data),
     // showing #loading and clearing #error appropriately.
+    renderMedicines(fetchMedicines());
 });
 
 document.getElementById("load-unreliable").addEventListener("click", async () => {
